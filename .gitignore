@@ -1,0 +1,32 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
+
+# Python build and packaging output
+build/
+dist/
+*.egg-info/
+.eggs/
