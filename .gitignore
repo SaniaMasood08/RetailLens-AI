@@ -17,6 +17,9 @@ htmlcov/
 .ipynb_checkpoints/
 **/.ipynb_checkpoints/
 
+# Raw datasets
+data/raw/
+
 # Environment and local secrets
 .env
 .env.*
