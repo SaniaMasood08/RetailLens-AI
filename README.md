@@ -110,23 +110,11 @@ Final selected-model metrics on the held-out test partition:
 
 For context, the original Random Forest baseline's recorded test MAE was 13,323.01 (RMSE 18,697.97; R² 0.406). The selected model's recorded test score is lower on this test period. This comparison is descriptive and does not establish performance on a different time period or retailer. Metrics are in the dataset's recorded monetary units; no currency is inferred by the dashboard.
 
-## Streamlit dashboard
+## Streamlit application
 
-Run the application with the command below to explore these sections:
+The application is organized into six navigable pages: **Overview**, **Sales Explorer**, **Product & Customer Insights**, **Revenue Forecast**, **Decision Center**, and **Methodology**. Historical exploration pages share sidebar date, country, and product filters; the selected transaction rows consistently drive their displayed totals, charts, and tables. The forecast remains the packaged historical estimate and is not changed by exploration filters.
 
-1. **Executive sales overview** — headline totals and period context.
-2. **Sales trend intelligence** — daily and monthly revenue patterns.
-3. **Forecast & decision center** — forecast origin, target date, model estimate, cutoff-aligned recent baseline, and user-adjustable scenario estimates.
-4. **Seller Decision Center** — transparent threshold-based forecast signal, historical product and market summaries, inventory review cues, cancellations, and rule-based recommendations.
-5. **Product intelligence** — product-level historical revenue and activity.
-6. **Customer-country intelligence** — descriptive summaries by recorded customer country.
-7. **Business alerts** — historical outlier rules and an anomaly explorer with date-level context.
-8. **Descriptive business insights** — summaries such as strongest and weakest observed months, weekday averages, and leading products/countries.
-9. **Model performance** — validation comparison and held-out test metrics.
-10. **Model explainability** — fitted Random Forest feature-importance values.
-11. **Methodology and limitations** — process summary and interpretation notes.
-
-The Seller Decision Center uses simple, visible rules (including a ±10% forecast-to-baseline threshold) to surface items for review. It combines the model forecast with historical recorded activity; it does not calculate optimal stock quantities, infer causal drivers, or promise demand. Product and country summaries are descriptive.
+The Decision Center preserves the project's transparent ±10% forecast-to-baseline rule and historical activity summaries. These are review cues, not optimal stock calculations, causal findings, or promises of demand. The interface does not retrain the model.
 
 ## How the system can support business decisions
 
@@ -148,7 +136,8 @@ The dashboard can help a reviewer monitor recorded revenue patterns, compare the
 
 ```text
 RetailLens-AI/
-├── app.py                              # Streamlit dashboard
+├── app.py                              # Streamlit Overview page
+├── pages/                              # Streamlit multipage application
 ├── requirements.txt                    # Runtime and notebook dependencies
 ├── README.md                           # Project documentation
 ├── data/
@@ -160,6 +149,7 @@ RetailLens-AI/
 ├── notebooks/
 │   └── 01_exploratory_data_analysis.ipynb
 └── src/
+    ├── dashboard.py                     # Shared Streamlit styling, loading, and filters
     ├── preprocessing.py
     ├── feature_engineering.py
     ├── train_models.py
@@ -211,17 +201,19 @@ These commands rewrite processed datasets/results; `package_model.py` fits the s
 The repository does not currently include a standalone automated test suite. The following checks compile the Python files and exercise the Streamlit app using its testing interface:
 
 ```bash
-./.venv/bin/python -m py_compile app.py src/*.py
+./.venv/bin/python -m py_compile app.py src/*.py pages/*.py
 ./.venv/bin/python - <<'PY'
 from streamlit.testing.v1 import AppTest
 
-at = AppTest.from_file("app.py")
-at.run(timeout=30)
-print("exceptions:", len(at.exception))
-print("dataframes:", len(at.dataframe))
-if at.exception:
-    for error in at.exception:
-        print(error)
+from pathlib import Path
+
+for path in [Path("app.py"), *sorted(Path("pages").glob("*.py"))]:
+    at = AppTest.from_file(str(path))
+    at.run(timeout=30)
+    print(path, "exceptions:", len(at.exception))
+    if at.exception:
+        for error in at.exception:
+            print(error)
 PY
 git diff --check
 ```
